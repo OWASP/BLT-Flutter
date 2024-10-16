@@ -139,7 +139,16 @@ class _GlobalLeaderBoardPageState extends State<GlobalLeaderBoardPage> {
                             itemBuilder: (context, index) {
                               int title = list[index].title;
                               return ListTile(
-                                onTap: () {},
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => UserProfile(
+                                        user: list[index].user,
+                                      ),
+                                    ),
+                                  );
+                                },
                                 shape: RoundedRectangleBorder(
                                   borderRadius: index == 0
                                       ? BorderRadius.only(

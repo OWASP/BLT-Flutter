@@ -230,7 +230,19 @@ class IssueDetailPage extends StatelessWidget {
                 padding: EdgeInsets.all(0),
                 selectable: true,
                 onTapLink: (text, href, title) {
-                  _launchUrl(href!);
+                  if (href != null && href.startsWith('user:')) {
+                    final username = href.substring(5);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => UserProfile(
+                          user: User(username: username),
+                        ),
+                      ),
+                    );
+                  } else {
+                    _launchUrl(href!);
+                  }
                 },
                 styleSheet: MarkdownStyleSheet.fromTheme(
                   ThemeData(
