@@ -1,4 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:blt/src/pages/home/home_imports.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -88,28 +87,16 @@ class _ReportFormState extends ConsumerState<ReportForm> {
     }
   }
 
-  // Future<File> _coverToImage(Uint8List imageBytes) async {
-  //   String tempPath = (await getTemporaryDirectory()).path;
-  //   File file = File('$tempPath/profile.png');
-  //   await file.writeAsBytes(imageBytes.buffer
-  //       .asUint8List(imageBytes.offsetInBytes, imageBytes.lengthInBytes));
-  //   return file;
-  // }
-
-  // Future<void> _pasteImageFromClipBoard() async {
-  //   try {
-  //     final imageBytes = await Pasteboard.image;
-  //     late File? image;
-  //     if (imageBytes != null) {
-  //       image = await _coverToImage(imageBytes);
-  //     }
-  //     setState(() {
-  //       _image = image;
-  //     });
-  //   } catch (e) {
-  //     print('No Image Found On Clipboard');
-  //   }
-  // }
+  Future<void> _pasteImageFromClipboard() async {
+    Uint8List? imageBytes = await _getImageFromClipboard();
+    if (imageBytes != null) {
+      setState(() {
+        _image.add(File.fromRawPath(imageBytes));
+      });
+    } else {
+      print('No Image Found On Clipboard');
+    }
+  }
 
   void markdownFormatting(String formatter) {
     int start = _descriptionController.selection.baseOffset;
@@ -639,6 +626,15 @@ class _ReportFormState extends ConsumerState<ReportForm> {
                                     hintText: AppLocalizations.of(context)!
                                         .descriptio,
                                     border: InputBorder.none,
+                                    contentInsertionConfiguration:
+                                        ContentInsertionConfiguration(
+                                      onContentInserted: (content) {
+                                        if (content.mimeType == "image/png") {
+                                          _pasteImageFromClipboard();
+                                        }
+                                      },
+                                      allowedMimeTypes: ["image/png"],
+                                    ),
                                   ),
                                   style: GoogleFonts.aBeeZee(
                                     textStyle: TextStyle(
