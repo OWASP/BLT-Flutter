@@ -1,13 +1,11 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:blt/src/pages/home/home_imports.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:device_apps/device_apps.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 
 import '../../models/tags_model.dart';
 import '../../util/api/tags_api.dart';
 
-/// Report Bug and Start Bug Hunt Page, namesake, used for
-/// posting bugs, companies and individuals
-/// should be able to start bughunts.
 class ReportBug extends ConsumerStatefulWidget {
   final ReportPageDefaults reportPageDefaults;
   final Company? company;
@@ -73,6 +71,14 @@ class _ReportFormState extends ConsumerState<ReportForm> {
   bool showLabel = false;
   List<Tag> _labels = [];
   late List<bool> _labelsState;
+  List<Application> _installedApps = [];
+  List<String> _iosApps = [
+    "com.apple.mobilesafari",
+    "com.apple.MobileSMS",
+    "com.apple.Preferences",
+    "com.apple.AppStore",
+    "com.apple.Maps"
+  ];
 
   Future<void> _pickImageFromGallery() async {
     final imageFile = await picker.pickMultiImage();
@@ -87,29 +93,6 @@ class _ReportFormState extends ConsumerState<ReportForm> {
       });
     }
   }
-
-  // Future<File> _coverToImage(Uint8List imageBytes) async {
-  //   String tempPath = (await getTemporaryDirectory()).path;
-  //   File file = File('$tempPath/profile.png');
-  //   await file.writeAsBytes(imageBytes.buffer
-  //       .asUint8List(imageBytes.offsetInBytes, imageBytes.lengthInBytes));
-  //   return file;
-  // }
-
-  // Future<void> _pasteImageFromClipBoard() async {
-  //   try {
-  //     final imageBytes = await Pasteboard.image;
-  //     late File? image;
-  //     if (imageBytes != null) {
-  //       image = await _coverToImage(imageBytes);
-  //     }
-  //     setState(() {
-  //       _image = image;
-  //     });
-  //   } catch (e) {
-  //     print('No Image Found On Clipboard');
-  //   }
-  // }
 
   void markdownFormatting(String formatter) {
     int start = _descriptionController.selection.baseOffset;
@@ -403,11 +386,33 @@ class _ReportFormState extends ConsumerState<ReportForm> {
     });
   }
 
+  void getInstalledApps() async {
+    if (Platform.isAndroid) {
+      List<Application> apps = await DeviceApps.getInstalledApplications(
+          includeAppIcons: true, includeSystemApps: true);
+      setState(() {
+        _installedApps = apps;
+      });
+    } else if (Platform.isIOS) {
+      List<Application> apps = [];
+      for (String app in _iosApps) {
+        bool isInstalled = await DeviceApps.isAppInstalled(app);
+        if (isInstalled) {
+          apps.add(Application(appName: app, packageName: app));
+        }
+      }
+      setState(() {
+        _installedApps = apps;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _checkStatus();
     getAvailableLabels();
+    getInstalledApps();
     if (widget.reportPageDefaults.sharedMediaFile != null) {
       _image = [File(widget.reportPageDefaults.sharedMediaFile!.path)];
     }
@@ -455,9 +460,53 @@ class _ReportFormState extends ConsumerState<ReportForm> {
                 ),
                 SizedBox(
                   height: 40,
-                  child: TextFormField(
-                    controller: _titleController,
-                    focusNode: _titleFocusNode,
+                  child: TypeAheadFormField<Application>(
+                    textFieldConfiguration: TextFieldConfiguration(
+                      controller: _titleController,
+                      focusNode: _titleFocusNode,
+                      decoration: InputDecoration(
+                        hintText: (_titleFocusNode.hasFocus)
+                            ? AppLocalizations.of(context)!.exampleURL
+                            : AppLocalizations.of(context)!.url,
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(8.0),
+                          ),
+                          borderSide: BorderSide(color: Colors.grey),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(8.0),
+                          ),
+                          borderSide: BorderSide(color: Colors.grey),
+                        ),
+                        contentPadding:
+                            EdgeInsets.only(top: 8.0, left: 16.0, right: 16.0),
+                      ),
+                      cursorColor: Color(0xFFDC4654),
+                      style: GoogleFonts.aBeeZee(
+                        textStyle: TextStyle(
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                    suggestionsCallback: (pattern) async {
+                      return _installedApps.where((app) => app.appName
+                          .toLowerCase()
+                          .contains(pattern.toLowerCase()));
+                    },
+                    itemBuilder: (context, Application suggestion) {
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundImage: MemoryImage(suggestion.icon),
+                        ),
+                        title: Text(suggestion.appName),
+                        subtitle: Text(suggestion.packageName),
+                      );
+                    },
+                    onSuggestionSelected: (Application suggestion) {
+                      _titleController.text = suggestion.appName;
+                    },
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return AppLocalizations.of(context)!.requiredField;
@@ -471,31 +520,6 @@ class _ReportFormState extends ConsumerState<ReportForm> {
                         });
                       }
                     },
-                    decoration: InputDecoration(
-                      hintText: (_titleFocusNode.hasFocus)
-                          ? AppLocalizations.of(context)!.exampleURL
-                          : AppLocalizations.of(context)!.url,
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(8.0),
-                        ),
-                        borderSide: BorderSide(color: Colors.grey),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(8.0),
-                        ),
-                        borderSide: BorderSide(color: Colors.grey),
-                      ),
-                      contentPadding:
-                          EdgeInsets.only(top: 8.0, left: 16.0, right: 16.0),
-                    ),
-                    cursorColor: Color(0xFFDC4654),
-                    style: GoogleFonts.aBeeZee(
-                      textStyle: TextStyle(
-                        fontSize: 12,
-                      ),
-                    ),
                   ),
                 ),
                 SizedBox(
