@@ -77,21 +77,20 @@ class _ReportFormState extends ConsumerState<ReportForm> {
   List<Tag> _labels = [];
   late List<bool> _labelsState;
   static const platform = MethodChannel('clipboard_image_channel');
-  bool _isSnackBarVisible = false; // Flag to track snackbar visibility
+  bool _isSnackBarVisible = false;
 
   void showSnackBar(BuildContext context, String message) {
     if (!_isSnackBarVisible) {
-      _isSnackBarVisible = true; // Set flag to true when showing snackbar
+      _isSnackBarVisible = true;
       ScaffoldMessenger.of(context)
           .showSnackBar(
             SnackBar(
               content: Text(message),
-              duration: Duration(seconds: 3), // Set an appropriate duration
+              duration: Duration(seconds: 3),
             ),
           )
           .closed
           .then((_) {
-        // Reset flag once snackbar is dismissed
         _isSnackBarVisible = false;
       });
     }
@@ -113,39 +112,25 @@ class _ReportFormState extends ConsumerState<ReportForm> {
 
   Future<void> _pasteImage() async {
     try {
-      // Invoke the platform method to get the image
       String base64Image = await platform.invokeMethod('getClipboardImage');
-
-      // Remove new lines and spaces from the base64 string
       base64Image = base64Image.replaceAll(RegExp(r'\s+'), '');
-
-      // Add padding if necessary
       while (base64Image.length % 4 != 0) {
-        base64Image += "="; // Add padding
+        base64Image += "=";
       }
-
-      // Decode the cleaned base64 string
       Uint8List decodedImage = base64Decode(base64Image);
-
-      // Get the application's temporary directory
       Directory tempDir = await getTemporaryDirectory();
       String tempPath = tempDir.path;
 
-      // Create a temporary file to store the image
       File tempFile = File(
           '$tempPath/temp_image_${DateTime.now().millisecondsSinceEpoch}.png');
 
-      // Write the decoded image data to the file
       await tempFile.writeAsBytes(decodedImage);
 
-      // Append the temporary file to the _image list
       setState(() {
         _image.add(tempFile);
       });
-    } on PlatformException catch (e) {
+    } on PlatformException {
       showSnackBar(context, 'No image available on clipboard');
-    } catch (e) {
-      print("Failed to decode image: $e");
     }
   }
 
@@ -864,7 +849,6 @@ class _ReportFormState extends ConsumerState<ReportForm> {
                     height: 125.0,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
-                      // itemCount: min(5, _image.length + 1),
                       itemCount: _image.length < 5 ? _image.length + 2 : 5,
                       itemBuilder: (_, i) {
                         if (i < _image.length) {
@@ -930,7 +914,7 @@ class _ReportFormState extends ConsumerState<ReportForm> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: InkWell(
-                                onTap: _pasteImage, // Existing add image action
+                                onTap: _pasteImage,
                                 child: Ink(
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(8),
