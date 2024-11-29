@@ -221,7 +221,16 @@ class _MonthlyLeaderBoardPageState
                               itemCount: list.length,
                               itemBuilder: (context, index) {
                                 return ListTile(
-                                  onTap: () {},
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => UserProfile(
+                                          user: list[index].user,
+                                        ),
+                                      ),
+                                    );
+                                  },
                                   shape: RoundedRectangleBorder(
                                     borderRadius: index == 0
                                         ? BorderRadius.only(

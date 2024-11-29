@@ -4,9 +4,11 @@ import 'package:http/http.dart' as http;
 /// Page that displays the stats of a user registered on BLT,
 /// shows dummy data for Guest login.
 class UserProfile extends ConsumerStatefulWidget {
+  final User user;
+
   const UserProfile({
     Key? key,
-    User? user,
+    required this.user,
   }) : super(key: key);
 
   @override
@@ -19,10 +21,10 @@ class _UserProfileState extends ConsumerState<UserProfile> {
   late Future<List<Issue>?> getFlaggedList;
 
   ImageProvider<Object> getProfilePicture() {
-    if (currentUser!.pfpLink == null) {
+    if (widget.user.pfpLink == null) {
       return AssetImage("assets/default_profile.png");
     } else {
-      return NetworkImage(currentUser!.pfpLink!);
+      return NetworkImage(widget.user.pfpLink!);
     }
   }
 
@@ -335,30 +337,30 @@ class _UserProfileState extends ConsumerState<UserProfile> {
 
   @override
   void initState() {
-    getLikedList = (currentUser! == guestUser)
+    getLikedList = (widget.user == guestUser)
         ? getAnonymousUserIssueList()
         : getIssueList(
-            currentUser!.likedIssueId != null
-                ? (currentUser!.likedIssueId!.length > 0
-                    ? currentUser!.likedIssueId!
+            widget.user.likedIssueId != null
+                ? (widget.user.likedIssueId!.length > 0
+                    ? widget.user.likedIssueId!
                     : null)
                 : null,
           );
-    getSavedList = (currentUser! == guestUser)
+    getSavedList = (widget.user == guestUser)
         ? getAnonymousUserIssueList()
         : getIssueList(
-            currentUser!.savedIssueId != null
-                ? (currentUser!.savedIssueId!.length > 0
-                    ? currentUser!.savedIssueId!
+            widget.user.savedIssueId != null
+                ? (widget.user.savedIssueId!.length > 0
+                    ? widget.user.savedIssueId!
                     : null)
                 : null,
           );
-    getFlaggedList = (currentUser! == guestUser)
+    getFlaggedList = (widget.user == guestUser)
         ? getAnonymousUserIssueList()
         : getIssueList(
-            currentUser!.flaggedIssueId != null
-                ? (currentUser!.flaggedIssueId!.length > 0
-                    ? currentUser!.flaggedIssueId!
+            widget.user.flaggedIssueId != null
+                ? (widget.user.flaggedIssueId!.length > 0
+                    ? widget.user.flaggedIssueId!
                     : null)
                 : null,
           );
@@ -381,7 +383,7 @@ class _UserProfileState extends ConsumerState<UserProfile> {
             Navigator.of(context).pop();
           },
         ),
-        title: Text(currentUser!.username!),
+        title: Text(widget.user.username!),
         actions: [
           IconButton(
             onPressed: () async {
@@ -412,7 +414,7 @@ class _UserProfileState extends ConsumerState<UserProfile> {
                         AppLocalizations.of(context)!.updatingProfilePicture),
                   );
                   ScaffoldMessenger.of(context).showSnackBar(updatingSnack);
-                  await UserApiClient.updatePfp(image, currentUser!);
+                  await UserApiClient.updatePfp(image, widget.user);
                   setState(() {});
                   break;
 
@@ -472,7 +474,7 @@ class _UserProfileState extends ConsumerState<UserProfile> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      currentUser!.username!,
+                      widget.user.username!,
                       style: GoogleFonts.ubuntu(
                         textStyle: TextStyle(
                           color: Color(0xFFDC4654),
@@ -482,7 +484,7 @@ class _UserProfileState extends ConsumerState<UserProfile> {
                       ),
                     ),
                     Text(
-                      '#${currentUser!.id!}',
+                      '#${widget.user.id!}',
                       style: GoogleFonts.aBeeZee(
                         textStyle: TextStyle(
                           color: Color(0xFF737373).withOpacity(0.5),
@@ -497,8 +499,8 @@ class _UserProfileState extends ConsumerState<UserProfile> {
                           vertical: 5.0,
                         ),
                         child: Text(
-                          (currentUser!.description != null)
-                              ? currentUser!.description!
+                          (widget.user.description != null)
+                              ? widget.user.description!
                               : AppLocalizations.of(context)!
                                   .noDescriptionWriteOne,
                           style: GoogleFonts.aBeeZee(
@@ -511,11 +513,11 @@ class _UserProfileState extends ConsumerState<UserProfile> {
                       ),
                     ),
                     SizedBox(
-                      child: (currentUser!.following != null)
+                      child: (widget.user.following != null)
                           ? TextButton(
                               onPressed: () {},
                               child: Text(
-                                currentUser!.following!.length.toString() +
+                                widget.user.following!.length.toString() +
                                     AppLocalizations.of(context)!.following,
                                 style: GoogleFonts.aBeeZee(
                                   textStyle: TextStyle(
@@ -531,12 +533,12 @@ class _UserProfileState extends ConsumerState<UserProfile> {
                       thickness: 2,
                     ),
                     SizedBox(
-                      child: (currentUser!.following != null)
+                      child: (widget.user.following != null)
                           ? TextButton(
                               onPressed: () {},
                               child: Text(
-                                (currentUser!.totalScore != null)
-                                    ? "${AppLocalizations.of(context)!.score} : ${currentUser!.totalScore!} "
+                                (widget.user.totalScore != null)
+                                    ? "${AppLocalizations.of(context)!.score} : ${widget.user.totalScore!} "
                                     : "${AppLocalizations.of(context)!.score} : 0 ",
                                 style: GoogleFonts.aBeeZee(
                                   textStyle: TextStyle(
@@ -732,7 +734,7 @@ class _UserProfileState extends ConsumerState<UserProfile> {
                     Center(
                       child: TextButton(
                         onPressed: () async {
-                          if (currentUser == guestUser) {
+                          if (widget.user == guestUser) {
                             ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(content: Text("Anonymous User !!")));
                           } else {
