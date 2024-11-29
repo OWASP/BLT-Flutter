@@ -23,7 +23,7 @@ dependencies:
   intl:
   flutter_secure_storage: ^9.0.0
   smooth_page_indicator: ^1.0.0+2
-  pasteboard: ^0.2.0
+  pasteboard: ^0.3.0
   path_provider: ^2.0.13
   url_launcher: ^6.2.5
   #flutter_inappwebview: ^5.7.2+3
