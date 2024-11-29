@@ -1,5 +1,3 @@
-//import 'dart:async';
-
 import 'package:blt/src/pages/onboarding_main_page.dart';
 import 'package:blt/src/providers/dark_mode_provider.dart';
 import 'package:blt/src/providers/language_provider.dart';
@@ -9,9 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-//import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import 'package:blt/src/pages/banned_apps_page.dart';
 
-/// ### The BLT app's root widget
 class BLT extends StatefulWidget {
   const BLT({Key? key}) : super(key: key);
 
@@ -55,6 +52,9 @@ class BLTState extends State<BLT> {
               themeMode:
                   themeMode.isDarkMode ? ThemeMode.dark : ThemeMode.light,
               home: Scaffold(body: OnboardingMainPage()),
+              routes: {
+                '/bannedApps': (context) => BannedAppsPage(),
+              },
             );
           },
         ),

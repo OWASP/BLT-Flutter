@@ -334,6 +334,15 @@ class _HomeState extends ConsumerState<Home> {
                   );
                 },
               ),
+              ListTile(
+                title: Text("Banned Apps"),
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    '/bannedApps',
+                  );
+                },
+              ),
               SwitchListTile(
                 title: Text("Dark Mode"),
                 value: isDarkMode.isDarkMode,
